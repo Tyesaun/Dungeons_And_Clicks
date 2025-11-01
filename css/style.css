@@ -119,4 +119,33 @@
     background: rgba(255,255,255,0.1);
     transform: scale(1.05);
   }
+  .inventory-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 6px;
+    background: rgba(255,255,255,0.03);
+    padding: 8px;
+    border-radius: 8px;
+    margin-top: 6px;
+  }
+
+  .slot {
+    width: 38px;
+    height: 38px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    color: #cba15d;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s;
+  }
+
+  .slot:hover {
+    background: rgba(255,255,255,0.08);
+    transform: scale(1.05);
+  }
 

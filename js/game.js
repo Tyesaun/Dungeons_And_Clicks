@@ -1,78 +1,7 @@
+import { ITEMS, addItemToInventory, useItem, updateInventoryUI } from './items.js';
+import { classes, Player } from './Classes.js';
 
 // --- Game data ---
-// --- Player Class Templates ---
-const classes = {
-  warrior: {
-    name: "Valen the Stalwart",
-    class: "Warrior",
-    maxHp: 30,
-    hp: 30,
-    maxMp: 10,
-    mp: 10,
-    atk: 6,
-    def: 4,
-    level: 1,
-    kills: 0,
-    exp: 0,
-    expToNext: 20,
-    skill: {
-      name: "Shoulder Bash",
-      mpCost: 3,
-      baseDamage: 2,
-      stunChance: 0.35,
-      cooldown: 2,
-      description: "A powerful shoulder strike that deals bonus damage and may stun the foe."
-    }
-  },
-  mage: {
-    name: "Lyra the Emberweaver",
-    class: "Mage",
-    maxHp: 20,
-    hp: 20,
-    maxMp: 20,
-    mp: 20,
-    atk: 4,
-    def: 2,
-    level: 1,
-    kills: 0,
-    exp: 0,
-    expToNext: 20,
-    skill: {
-      name: "Fire Bolt",
-      mpCost: 5,
-      baseDamage: 5,
-      burnChance: 0.4,
-      cooldown: 1,
-      description: "Hurls a blazing bolt that scorches the target, with a chance to inflict burning damage over time."
-    }
-  },
-  rogue: {
-    name: "Kira the Swift",
-    class: "Rogue",
-    maxHp: 25,
-    hp: 25,
-    maxMp: 12,
-    mp: 12,
-    atk: 5,
-    def: 3,
-    level: 1,
-    kills: 0,
-    exp: 0,
-    expToNext: 20,
-    skill: {
-      name: "Quick Shot",
-      mpCost: 4,
-      baseDamage: 1,
-      cooldown: 2,
-      extraAttackChance: 1.0, // always triggers extra attack (can adjust later)
-      description: "A rapid attack that allows you to strike twice in one turn."
-    }
-  }
-};
-
-
-
-
 
 let player = null;
 let depth = 1;
@@ -85,13 +14,16 @@ document.getElementById("choose-warrior").addEventListener("click", () => startG
 document.getElementById("choose-mage").addEventListener("click", () => startGame("mage"));
 document.getElementById("choose-rogue").addEventListener("click", () => startGame("rogue"));
 
-function startGame(chosenClass) {
-  player = JSON.parse(JSON.stringify(classes[chosenClass]));
+function startGame(selectedClass) {
+  player = new Player(classes[selectedClass]); // or cloneClass('warrior')
   document.getElementById("class-select").style.display = "none";
-  document.getElementById("game-container").style.display = "grid"; // show game area
+  document.getElementById("game-container").style.display = "grid";
+
   log(`<em>Welcome, ${player.name} the ${player.class}!</em>`);
   updateUI();
+  updateInventoryUI(player);
 }
+
 const armorSlots = {
   head: null,
   chest: null,
@@ -115,10 +47,6 @@ function updateArmorUI() {
   });
 }
 
-// Example: equip armor
-armorSlots.head = { name: 'Iron Helm', icon: '🪖' };
-updateArmorUI();
-
 const inventorySlots = document.querySelectorAll('#inventory .slot');
 let inventory = new Array(10).fill(null);
 
@@ -133,10 +61,6 @@ function updateInventory() {
     }
   });
 }
-
-// Example: add an item
-inventory[0] = { name: 'Health Potion', icon: '🧪' };
-updateInventory();
 
 // Utility
 function log(text, cls='') {
@@ -206,6 +130,7 @@ function updateUI() {
   document.getElementById('rest').disabled = player.hp <= 0;
   document.getElementById('enter-room').disabled = player.hp <= 0;
   document.getElementById('player-class').textContent = player.class;
+  document.getElementById('gold').textContent = player.gold;
 }
 
 // Combat calculation helpers
@@ -394,7 +319,27 @@ function enemyTurn() {
 function enemyDies() {
   log(`<strong>The ${enemy.name} falls.</strong>`);
   player.kills++;
-  // small level progression every 3 kills
+
+  // 💰 Gold drop calculation
+  const goldDrop = Math.floor(Math.random() * 8 + 3 + depth * 1.2); // 3–10 + depth scaling
+  player.gold = (player.gold || 0) + goldDrop; // ensure player.gold exists
+
+  const lootMessages = [
+    `You scoop up <strong>${goldDrop}</strong> gold coins.`,
+    `The ${enemy.name} dropped <strong>${goldDrop}</strong> coins!`,
+    `You find <strong>${goldDrop}</strong> gold among the remains.`,
+    `A small pouch jingles with <strong>${goldDrop}</strong> gold coins.`
+  ];
+  log(lootMessages[Math.floor(Math.random() * lootMessages.length)] + " 💰");
+
+  // 🎁 20% chance to drop an item (e.g., Minor Potion)
+  if (Math.random() < 0.2) {
+    const item = ITEMS.minorPotion;
+    addItemToInventory(player, item);
+    log(`You found a <strong>${item.name}</strong> ${item.icon}! It’s been added to your inventory.`);
+  }
+
+  // 🔼 Small level progression every 3 kills
   if (player.kills % 3 === 0) {
     player.level++;
     player.maxHp += 4;
@@ -403,17 +348,21 @@ function enemyDies() {
     player.def += 1;
     log(`<strong>You feel stronger.</strong> Level up! You are now level ${player.level}.`);
   }
+
   inCombat = false;
   enemy = null;
   depth++;
-  // remove enemy UI
-  const old = document.getElementById('enemy-section'); if (old) old.remove();
-  // EXP gain
+
+  // Remove enemy UI if it exists
+  const old = document.getElementById('enemy-section');
+  if (old) old.remove();
+
+  // ⭐ EXP gain
   const expGain = 8 + Math.floor(Math.random() * 6) + depth;
   player.exp += expGain;
   log(`<span class="muted">You gain <strong>${expGain} EXP</strong>.</span>`);
 
-  // Level-up check
+  // 🎚 Level-up check
   if (player.exp >= player.expToNext) {
     player.exp -= player.expToNext;
     player.level++;
@@ -425,8 +374,11 @@ function enemyDies() {
     log(`<strong>You feel stronger.</strong> Level up! You are now level ${player.level}.`);
   }
 
+  // 🧾 Update all UI elements, including gold and inventory if displayed
   updateUI();
 }
+
+
 
 function updateEnemyUI() {
   if (!enemy) return;
@@ -484,7 +436,7 @@ document.getElementById('restart').addEventListener('click', () => { restart(); 
 // Skill (side button in left panel)
 document.getElementById('skill-btn').addEventListener('click', () => { playerSkill(); });
 // Keep UI in sync with changes
-updateUI();
+// updateUI();
 
 // Accessibility hint
 log(`<em class="muted">Tip: this prototype is intentionally simple. Combat is short — good for quick plays.</em>`);
