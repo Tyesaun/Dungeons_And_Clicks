@@ -74,15 +74,69 @@ const classes = {
 
 
 
-// let player = JSON.parse(JSON.stringify(classes.warrior));
-// or to test Mage:
-// let player = JSON.parse(JSON.stringify(classes.mage));
-let player = JSON.parse(JSON.stringify(classes.rogue));
+let player = null;
 let depth = 1;
 let enemy = null;
 let inCombat = false;
 let cooldown = 0; // Spec Skill cooldown in turns
 let logEl = document.getElementById('log');
+// Class selection
+document.getElementById("choose-warrior").addEventListener("click", () => startGame("warrior"));
+document.getElementById("choose-mage").addEventListener("click", () => startGame("mage"));
+document.getElementById("choose-rogue").addEventListener("click", () => startGame("rogue"));
+
+function startGame(chosenClass) {
+  player = JSON.parse(JSON.stringify(classes[chosenClass]));
+  document.getElementById("class-select").style.display = "none";
+  document.getElementById("game-container").style.display = "grid"; // show game area
+  log(`<em>Welcome, ${player.name} the ${player.class}!</em>`);
+  updateUI();
+}
+const armorSlots = {
+  head: null,
+  chest: null,
+  arms: null,
+  legs: null,
+  back: null,
+  accessory1: null,
+  accessory2: null
+};
+
+function updateArmorUI() {
+  document.querySelectorAll('.armor-slot').forEach(slot => {
+    const key = slot.dataset.slot;
+    if (armorSlots[key]) {
+      slot.textContent = armorSlots[key].icon;
+      slot.title = armorSlots[key].name;
+    } else {
+      slot.textContent = '⬚'; // Empty placeholder
+      slot.title = `Empty ${key.charAt(0).toUpperCase() + key.slice(1)} Slot`;
+    }
+  });
+}
+
+// Example: equip armor
+armorSlots.head = { name: 'Iron Helm', icon: '🪖' };
+updateArmorUI();
+
+const inventorySlots = document.querySelectorAll('#inventory .slot');
+let inventory = new Array(10).fill(null);
+
+function updateInventory() {
+  inventorySlots.forEach((slot, i) => {
+    if (inventory[i]) {
+      slot.textContent = inventory[i].icon;
+      slot.title = inventory[i].name;
+    } else {
+      slot.textContent = '';
+      slot.title = 'Empty Slot';
+    }
+  });
+}
+
+// Example: add an item
+inventory[0] = { name: 'Health Potion', icon: '🧪' };
+updateInventory();
 
 // Utility
 function log(text, cls='') {
@@ -131,6 +185,7 @@ function updateUI() {
   document.getElementById('p-level').textContent = 'Level ' + player.level;
   document.getElementById('p-hp-text').textContent = `${player.hp} / ${player.maxHp}`;
   document.getElementById('p-mp-text').textContent = `${player.mp} / ${player.maxMp}`;
+  document.querySelector('.player .avatar').textContent = player.class.charAt(0);
   document.getElementById('p-atk').textContent = player.atk;
   document.getElementById('p-def').textContent = player.def;
   document.getElementById('p-hp-bar').style.width = Math.max(0, (player.hp/player.maxHp)*100) + '%';

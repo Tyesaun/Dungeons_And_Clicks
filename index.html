@@ -3,67 +3,129 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Office Dungeon — Prototype (Warrior)</title>
+  <title>Office Dungeon — Prototype</title>
   <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
-<div class="stage" role="application" aria-label="Office Dungeon prototype">
-  <header>
-    <h1>Office Dungeon — Prototype</h1>
-    <div class="meta">Prototype — Class: <strong id="player-class"></strong> · Tone: <strong>Fantasy</strong></div>
-  </header>
 
-  <aside class="panel">
-    <div class="player">
-      <div class="avatar" aria-hidden="true">W</div>
-      <div class="stats">
-        <div class="stat-row"><div><strong id="p-name">Valen the Stalwart</strong></div><div class="small muted" id="p-level">Level 1</div></div>
-        <div class="stat-row"><div class="small muted">HP</div><div id="p-hp-text">30 / 30</div></div>
-        <div class="bar hp" title="Hit points"><i id="p-hp-bar" style="width:100%"></i></div>
-        <div class="stat-row"><div class="small muted">Stamina</div><div id="p-mp-text">10 / 10</div></div>
-        <div class="bar mp" title="Stamina"><i id="p-mp-bar" style="width:100%"></i></div>
-        <div class="stat-row"><div class="small muted">EXP</div><div id="p-exp-text">0 / 20</div></div>
-        <div class="bar exp" title="Experience"><i id="p-exp-bar" style="width:0%"></i></div>
-        <div class="stat-row"><div class="small muted">Attack</div><div id="p-atk">6</div></div>
-        <div class="stat-row"><div class="small muted">Defense</div><div id="p-def">4</div></div>
-      </div>
+  <!-- 🧙 Class Selection Screen -->
+  <div id="class-select" class="panel center">
+    <h2>Select Your Class</h2>
+    <div class="choices">
+      <button class="btn big" id="choose-warrior">🛡️ Warrior</button>
+      <button class="btn big" id="choose-mage">🔥 Mage</button>
+      <button class="btn big" id="choose-rogue">🗡️ Rogue</button>
     </div>
-    <div style="margin-top:12px" class="small muted">Skills</div>
-    <div style="display:flex; gap:8px; margin-top:8px">
-      <button id="skill-btn" class="btn big">
-      ${player.skill.name} <span class="small muted">(${player.skill.cooldown} turn cooldown)</span>
-      </button>
+    <p class="small muted" style="margin-top:10px;">
+      Each class has a unique skill — choose wisely!
+    </p>
+  </div>
+  <!-- 🛡️ Armor Equipment Panel -->
+  <div id="armor-panel" class="panel armor-panel">
+    <h3 class="small muted" style="margin-bottom:8px;">Equipment</h3>
+    <div class="armor-grid">
+      <div class="armor-slot" data-slot="head" title="Head Slot">🪖</div>
+      <div class="armor-slot" data-slot="chest" title="Chest Slot">🦺</div>
+      <div class="armor-slot" data-slot="arms" title="Arms Slot">🦾</div>
+      <div class="armor-slot" data-slot="legs" title="Legs Slot">🦿</div>
+      <div class="armor-slot" data-slot="back" title="Back Slot">🎒</div>
+      <div class="armor-slot" data-slot="accessory1" title="Accessory Slot 1">💍</div>
+      <div class="armor-slot" data-slot="accessory2" title="Accessory Slot 2">💍</div>
     </div>
-    <div style="margin-top:12px" class="small muted">Run Stats</div>
-    <div class="small muted" style="margin-top:6px">Depth: <strong id="depth">1</strong></div>
-    <div class="small muted">Enemies defeated: <strong id="kills">0</strong></div>
-  </aside>
+  </div>
 
-  <main class="panel viewport" id="viewport">
-    <div class="room" id="room">
-      <div class="room-title">The stone steps descend into silence...</div>
-      <div class="log" id="log" aria-live="polite">
-        <p>You are Valen the Stalwart, a warrior of temperate resolve. Your sword is at your side. Your quest begins at the mouth of an ancient dungeon.</p>
-        <p class="center-note">Click <strong>Enter Room</strong> to step forward.</p>
-      </div>
-    </div>
-    <div class="controls">
-      <div class="hud">
-        <div class="depth">Depth <strong id="depth2">1</strong></div>
-      </div>
-      <div style="margin-left:auto" class="choices">
-        <button id="enter-room" class="btn big">Enter Room</button>
-        <button id="rest" class="btn secondary big">Rest (+HP)</button>
-        <button id="restart" class="btn secondary big">Restart Run</button>
-      </div>
-    </div>
-  </main>
+  <!-- ⚔️ Main Game UI (hidden until class is chosen) -->
+  <div id="game-container" style="display:none;">
+    <div class="stage" role="application" aria-label="Office Dungeon prototype">
 
-  <footer>
-    <div class="small muted">Turn-based, quick combats. Designed for short play sessions.</div>
-    <div class="small muted">Made for prototype/testing — open this file in a browser.</div>
-  </footer>
-</div>
-<script src="js/game.js"></script>
+      <header>
+        <h1>Office Dungeon — Prototype</h1>
+        <div class="meta">
+          Prototype — Class: <strong id="player-class"></strong> · Tone: <strong>Fantasy</strong>
+        </div>
+      </header>
+
+      <aside class="panel">
+        <div class="player">
+          <div class="avatar" aria-hidden="true">W</div>
+          <div class="stats">
+            <div class="stat-row">
+              <div><strong id="p-name">Valen the Stalwart</strong></div>
+              <div class="small muted" id="p-level">Level 1</div>
+            </div>
+
+            <div class="stat-row"><div class="small muted">HP</div><div id="p-hp-text">30 / 30</div></div>
+            <div class="bar hp" title="Hit points"><i id="p-hp-bar" style="width:100%"></i></div>
+
+            <div class="stat-row"><div class="small muted">Stamina</div><div id="p-mp-text">10 / 10</div></div>
+            <div class="bar mp" title="Stamina"><i id="p-mp-bar" style="width:100%"></i></div>
+
+            <div class="stat-row"><div class="small muted">EXP</div><div id="p-exp-text">0 / 20</div></div>
+            <div class="bar exp" title="Experience"><i id="p-exp-bar" style="width:0%"></i></div>
+
+            <div class="stat-row"><div class="small muted">Attack</div><div id="p-atk">6</div></div>
+            <div class="stat-row"><div class="small muted">Defense</div><div id="p-def">4</div></div>
+          </div>
+        </div>
+        
+        <div style="margin-top:12px" class="small muted">Skills</div>
+        <div style="display:flex; gap:8px; margin-top:8px">
+          <!-- Populated dynamically in JS -->
+          <button id="skill-btn" class="btn big"></button>
+        </div>
+        
+        <div style="margin-top:12px" class="small muted">Run Stats</div>
+        <div class="small muted" style="margin-top:6px">Depth: <strong id="depth">1</strong></div>
+        <div class="small muted">Enemies defeated: <strong id="kills">0</strong></div>
+        <!-- 🧺 Inventory Section -->
+        <div style="margin-top:12px" class="small muted">Inventory</div>
+        <div id="inventory" class="inventory-grid">
+          <div class="slot" title="Empty Slot"></div>
+          <div class="slot" title="Empty Slot"></div>
+          <div class="slot" title="Empty Slot"></div>
+          <div class="slot" title="Empty Slot"></div>
+          <div class="slot" title="Empty Slot"></div>
+          <div class="slot" title="Empty Slot"></div>
+          <div class="slot" title="Empty Slot"></div>
+          <div class="slot" title="Empty Slot"></div>
+          <div class="slot" title="Empty Slot"></div>
+          <div class="slot" title="Empty Slot"></div>
+        </div>
+      </aside>
+      
+      <main class="panel viewport" id="viewport">
+        <div class="room" id="room">
+          <div class="room-title">The stone steps descend into silence...</div>
+          <div class="log" id="log" aria-live="polite">
+            <p>You stand at the mouth of an ancient dungeon.</p>
+            <p class="center-note">Click <strong>Enter Room</strong> to step forward.</p>
+          </div>
+        </div>
+
+        <div class="controls">
+          <div class="hud">
+            <div class="depth">Depth <strong id="depth2">1</strong></div>
+          </div>
+          <div style="margin-left:auto" class="choices">
+            <button id="enter-room" class="btn big">Enter Room</button>
+            <button id="rest" class="btn secondary big">Rest (+HP)</button>
+            <button id="restart" class="btn secondary big">Restart Run</button>
+          </div>
+        </div>
+      </main>
+
+      <footer>
+        <div class="small muted">
+          Turn-based, quick combats. Designed for short play sessions.
+        </div>
+        <div class="small muted">
+          Made for prototype/testing — open this file in a browser.
+        </div>
+      </footer>
+    </div>
+  </div>
+
+  <!-- JavaScript -->
+  <script src="js/game.js"></script>
 </body>
 </html>
